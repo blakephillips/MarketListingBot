@@ -13,15 +13,17 @@ class KuCoin:
         self.secret = api_secret
         self.key = api_key
 
-        self.test_connection()
+        self.connected = self.test_connection()
 
-    def test_connection(self):
+    def test_connection(self) -> bool:
         endpoint = "/api/v1/accounts"
         req = self.contact_api(endpoint, "GET")
         if req.status_code == 200:
-            print("Successful connection to KuCoin established")
+            print("Successful authentication to KuCoin established")
+            return True
         else:
-            print(f"{req.status_code}: {req.text}")
+            print(f"Error authenticating with KuCoin API, http status:{req.status_code} Error Contents:{req.text}")
+            return False
 
     def contact_api(self, endpoint: str, http_operation: str, body: dict = None):
         headers = self.get_headers(endpoint, http_operation, body)
@@ -32,7 +34,8 @@ class KuCoin:
         try:
             if http_operation == "POST":
                 response = session.post(f"{self.base_url}{endpoint}", params=body)
-            elif http_operation == "GET":
+            else:
+                if http_operation != "GET": print(f"Unknown HTTP operation {http_operation}, assuming GET.")
                 response = session.get(f"{self.base_url}{endpoint}")
 
             return response
