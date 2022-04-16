@@ -1,5 +1,6 @@
 /.venv
 /.idea
+.vscode/
 /.env
 api/markets/__pycache__
 api/metrics/__pycache__

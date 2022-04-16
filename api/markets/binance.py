@@ -67,18 +67,30 @@ class Binance:
 
         print(f"Cached {len(self.evaluated_ids)} binance news post IDs.")
 
-    def is_new_announcement(self) -> list:
+    def is_new_listing_announcement(self) -> list:
 
         articles = get_all_new_crypto_announcements()['articles']
         symbols = []
+        update_needed = False
+
         for article in articles:
             if article["code"] not in self.evaluated_ids:
+                update_needed = True
+
+                # Add this to previously spotted ids (so it's not seen as new in the future)
+                self.evaluated_ids.add(article["code"])
+
                 print(f"NEW ARTICLE: '{article['title']}'. Evaluating if it is a new listing.")
                 extract = evaluate_news_title(article['title'])
                 if extract:
-                    symbols.concat(extract)
-
+                    # List of new listing symbols (ex. BTC, ETH, etc)
+                    symbols.extend(extract)
         if not symbols:
             print("INFO: no new binance posts")
+
+        if update_needed: 
+            # Caching the new news posts
+            with open(self.files["evaluated_ids"], 'w') as outfile:
+                json.dump(list(self.evaluated_ids), outfile)
 
         return symbols

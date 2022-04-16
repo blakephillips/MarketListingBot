@@ -11,6 +11,7 @@ from api.metrics.coinmarketcap import CoinMarketCap
 
 
 def setup():
+    load_dotenv()
     validation_directories = [
         ("data", "for caching of API info and other information"),
         ("data/binance", "for caching binance news posts that have not been evaluated"),
@@ -36,7 +37,11 @@ async def binance_scrape():
     timeout = int(os.getenv("BINANCE_SCRAPER_COOLDOWN"))
     print(f"Starting binance coroutine with timeout of {timeout} seconds..")
     while True:
-        binance_scraper.is_new_announcement()
+        symbols = binance_scraper.is_new_listing_announcement()
+
+        if symbols:
+            pass
+
         await asyncio.sleep(timeout)
 
 
@@ -60,7 +65,6 @@ async def main():
 
 if __name__ == '__main__':
     setup()
-    load_dotenv()
 
     binance_scraper = Binance(
         root_dir=os.path.dirname(__file__)
